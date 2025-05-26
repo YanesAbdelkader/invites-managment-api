@@ -40,7 +40,7 @@ class InviteController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'description' => 'required|string',
-            'phone' => 'required|string|max:10',
+            'phone' => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -109,7 +109,7 @@ class InviteController extends Controller
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
-            'phone' => 'sometimes|string|max:10',
+            'phone' => 'sometimes|nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
