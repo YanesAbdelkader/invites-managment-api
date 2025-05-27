@@ -147,6 +147,37 @@ class InviteController extends Controller
         ], 200);
     }
 
+    public function updatePresence(Request $request, string $id): JsonResponse
+    {
+        $invite = Invite::find($id);
+
+        if (!$invite) {
+            return response()->json([
+                'message' => 'المدعو غير موجود'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'presence' => 'required|in:حاضر,غائب'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'فشل في التحقق من صحة البيانات',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $invite->update([
+            'presence' => $request->presence
+        ]);
+
+        return response()->json([
+            'message' => 'تم تحديث حالة المدعو بنجاح',
+            'Invite' => $invite
+        ], 200);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

@@ -10,5 +10,8 @@ class Invite extends Model
     use HasFactory;
     
     protected $table = 'invites';
-    protected $fillable = ['first_name', 'last_name', 'description', 'phone'];
+    protected $fillable = ['first_name', 'last_name', 'description', 'phone', 'presence'];
+    protected $attributes = [
+        'presence' => 'لم يتم التسجيل'
+    ];
 }

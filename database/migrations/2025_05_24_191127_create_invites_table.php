@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('description');
             $table->string('phone')->nullable();
+            $table->enum('presence', ['حاضر', 'غائب', 'لم يتم التسجيل'])->default('لم يتم التسجيل');
             $table->timestamps();
         });
     }

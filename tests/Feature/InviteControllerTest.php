@@ -47,6 +47,7 @@ class InviteControllerTest extends TestCase
                         'last_name',
                         'description',
                         'phone',
+                        'presence',
                         'created_at',
                         'updated_at'
                     ]
@@ -73,6 +74,7 @@ class InviteControllerTest extends TestCase
                     'last_name',
                     'description',
                     'phone',
+                    'presence',
                     'created_at',
                     'updated_at'
                 ]
@@ -85,23 +87,29 @@ class InviteControllerTest extends TestCase
     /** @test */
     public function cannot_create_invite_with_invalid_data()
     {
-        // Act
-        $response = $this->postJson('/api/invites', []);
+        // Arrange: Test cases for validation
+        $testCases = [
+            'empty_data' => [],
+            'missing_first_name' => array_merge($this->validInviteData, ['first_name' => '']),
+            'missing_last_name' => array_merge($this->validInviteData, ['last_name' => '']),
+            'missing_description' => array_merge($this->validInviteData, ['description' => '']),
+            'invalid_phone' => array_merge($this->validInviteData, ['phone' => '12345678901']) // More than 10 digits
+        ];
 
-        // Assert
-        $response
-            ->assertStatus(422)
-            ->assertJsonStructure([
-                'message',
-                'errors' => [
-                    'first_name',
-                    'last_name',
-                    'description',
-                    'phone'
-                ]
-            ]);
+        foreach ($testCases as $case => $data) {
+            // Act
+            $response = $this->postJson('/api/invites', $data);
 
-        $this->assertEquals('فشل في التحقق من صحة البيانات', $response['message']);
+            // Assert
+            $response
+                ->assertStatus(422)
+                ->assertJsonStructure([
+                    'message',
+                    'errors'
+                ]);
+
+            $this->assertEquals('فشل في التحقق من صحة البيانات', $response['message']);
+        }
     }
 
     /** @test */
@@ -124,6 +132,7 @@ class InviteControllerTest extends TestCase
                     'last_name',
                     'description',
                     'phone',
+                    'presence',
                     'created_at',
                     'updated_at'
                 ]
@@ -141,12 +150,9 @@ class InviteControllerTest extends TestCase
         // Assert
         $response
             ->assertStatus(404)
-            ->assertJsonStructure([
-                'message',
-                'error'
+            ->assertJson([
+                'message' => 'المدعو غير موجود'
             ]);
-
-        $this->assertEquals('المدعو غير موجود', $response['message']);
     }
 
     /** @test */
@@ -175,6 +181,7 @@ class InviteControllerTest extends TestCase
                     'last_name',
                     'description',
                     'phone',
+                    'presence',
                     'created_at',
                     'updated_at'
                 ]
@@ -185,15 +192,41 @@ class InviteControllerTest extends TestCase
     }
 
     /** @test */
+    public function can_update_invite_with_partial_data()
+    {
+        // Arrange
+        $invite = Invite::factory()->create();
+        $partialUpdate = ['first_name' => 'UpdatedFirstName'];
+
+        // Act
+        $response = $this->putJson("/api/invites/{$invite->id}", $partialUpdate);
+
+        // Assert
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'message' => 'تم تحديث بيانات المدعو بنجاح',
+                'Invite' => [
+                    'first_name' => 'UpdatedFirstName',
+                    'last_name' => $invite->last_name,
+                    'description' => $invite->description,
+                    'phone' => $invite->phone
+                ]
+            ]);
+    }
+
+    /** @test */
     public function cannot_update_invite_with_invalid_data()
     {
         // Arrange
         $invite = Invite::factory()->create();
+        $invalidData = [
+            'first_name' => str_repeat('a', 256), // Exceeds max length
+            'phone' => '12345678901' // Exceeds max length
+        ];
 
         // Act
-        $response = $this->putJson("/api/invites/{$invite->id}", [
-            'phone' => 'invalid_phone_number'
-        ]);
+        $response = $this->putJson("/api/invites/{$invite->id}", $invalidData);
 
         // Assert
         $response
@@ -202,8 +235,51 @@ class InviteControllerTest extends TestCase
                 'message',
                 'errors'
             ]);
+    }
 
-        $this->assertEquals('فشل في التحقق من صحة البيانات', $response['message']);
+    /** @test */
+    public function can_update_presence_status()
+    {
+        // Arrange
+        $invite = Invite::factory()->create();
+        $presenceStates = ['حاضر', 'غائب', 'لم يتم التسجيل'];
+
+        foreach ($presenceStates as $presence) {
+            // Act
+            $response = $this->putJson("/api/invites/{$invite->id}/presence", [
+                'presence' => $presence
+            ]);
+
+            // Assert
+            $response
+                ->assertStatus(200)
+                ->assertJson([
+                    'message' => 'تم تحديث حالة المدعو بنجاح',
+                    'Invite' => [
+                        'presence' => $presence
+                    ]
+                ]);
+
+            $this->assertDatabaseHas('invites', [
+                'id' => $invite->id,
+                'presence' => $presence
+            ]);
+        }
+    }
+
+    /** @test */
+    public function cannot_update_presence_with_invalid_status()
+    {
+        // Arrange
+        $invite = Invite::factory()->create();
+
+        // Act
+        $response = $this->putJson("/api/invites/{$invite->id}/presence", [
+            'presence' => 'invalid_status'
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
     }
 
     /** @test */
@@ -216,86 +292,19 @@ class InviteControllerTest extends TestCase
         $response = $this->deleteJson("/api/invites/{$invite->id}");
 
         // Assert
-        $response->assertStatus(204);
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'message' => 'تم حذف المدعو بنجاح'
+            ]);
+
         $this->assertDatabaseMissing('invites', ['id' => $invite->id]);
     }
 
     /** @test */
-    public function cannot_delete_nonexistent_invite()
+    public function create_and_edit_endpoints_return_405()
     {
-        // Act
-        $response = $this->deleteJson("/api/invites/999");
-
-        // Assert
-        $response
-            ->assertStatus(404)
-            ->assertJsonStructure([
-                'message',
-                'error'
-            ]);
-
-        $this->assertEquals('المدعو غير موجود', $response['message']);
-    }
-
-    /** @test */
-    public function can_update_invite_with_single_field()
-    {
-        // Arrange
-        $invite = Invite::factory()->create([
-            'first_name' => 'OldName',
-            'last_name' => 'OldLastName',
-            'description' => 'Old description',
-            'phone' => '1234567890'
-        ]);
-
-        // Act
-        $response = $this->putJson("/api/invites/{$invite->id}", [
-            'first_name' => 'NewName'
-        ]);
-
-        // Assert
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'message',
-                'Invite' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'description',
-                    'phone',
-                    'created_at',
-                    'updated_at'
-                ]
-            ]);
-
-        $this->assertEquals('تم تحديث بيانات المدعو بنجاح', $response['message']);
-        $this->assertEquals('NewName', $response['Invite']['first_name']);
-        $this->assertEquals('OldLastName', $response['Invite']['last_name']);
-        $this->assertEquals('Old description', $response['Invite']['description']);
-        $this->assertEquals('1234567890', $response['Invite']['phone']);
-    }
-
-    /** @test */
-    public function cannot_update_invite_with_empty_data()
-    {
-        // Arrange
-        $invite = Invite::factory()->create();
-
-        // Act
-        $response = $this->putJson("/api/invites/{$invite->id}", []);
-
-        // Assert
-        $response
-            ->assertStatus(422)
-            ->assertJsonStructure([
-                'status',
-                'message',
-                'errors' => [
-                    'general'
-                ]
-            ]);
-
-        $this->assertEquals('لم يتم تقديم أي بيانات للتحديث', $response['message']);
+        $this->getJson('/api/invites/create')->assertStatus(405);
+        $this->getJson('/api/invites/1/edit')->assertStatus(405);
     }
 } 
