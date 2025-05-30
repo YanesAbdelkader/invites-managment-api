@@ -1,61 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Invites Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A robust RESTful API built with Laravel for managing invitations and guest lists. This API serves as the backend for the [Invites Management System](https://invites-managment.vercel.app/).
 
-## About Laravel
+## 🌟 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   **Authentication System**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    -   Secure login/logout functionality
+    -   Token-based authentication using Laravel Sanctum
+    -   Protected routes for authorized access
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   **Invites Management**
+    -   CRUD operations for invites
+    -   Guest presence tracking
+    -   Real-time status updates
 
-## Learning Laravel
+## 🚀 Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-   **Framework:** Laravel 10.x
+-   **Authentication:** Laravel Sanctum
+-   **Database:** MySQL
+-   **Testing:** PHPUnit
+-   **API Documentation:** OpenAPI/Swagger
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 📋 API Endpoints
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Authentication
 
-## Laravel Sponsors
+```bash
+POST /api/auth/login    # User login
+POST /api/auth/logout   # User logout (protected)
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Invites Management (Protected Routes)
 
-### Premium Partners
+```bash
+GET    /api/invites          # List all invites
+POST   /api/invites          # Create new invite
+GET    /api/invites/{id}     # Get specific invite
+PUT    /api/invites/{id}     # Update invite
+DELETE /api/invites/{id}     # Delete invite
+PUT    /api/invites/{id}/presence  # Update invite presence
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🛠️ Installation
 
-## Contributing
+1. **Clone the repository**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone https://github.com/YOUR_USERNAME/invites-managment-api.git
+cd invites-managment-api
+```
 
-## Code of Conduct
+2. **Install dependencies**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+npm install
+```
 
-## Security Vulnerabilities
+3. **Environment Setup**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## License
+4. **Configure your database in `.env`**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+5. **Run migrations**
+
+```bash
+php artisan migrate
+```
+
+6. **Start the server**
+
+```bash
+php artisan serve
+```
+
+## 🔒 Security
+
+-   All sensitive routes are protected with authentication
+-   CORS configuration for secure cross-origin requests
+-   Input validation and sanitization
+-   Rate limiting on API endpoints
+
+## 🔗 Frontend Integration
+
+This API is integrated with a Next.js frontend application. You can find the frontend repository at:
+
+-   Repository: [github.com/YanesAbdelkader/invites-managment](https://github.com/YanesAbdelkader/invites-managment)
+-   Live Demo: [invites-managment.vercel.app](https://invites-managment.vercel.app/)
+
+## 👥 Contributors
+
+-   [@YanesAbdelkader](https://github.com/YanesAbdelkader)
+-   [@Juliettelfkk](https://github.com/Juliettelfkk)
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
